@@ -4,7 +4,7 @@ import os
 from shapely.geometry import Point, Polygon, MultiPolygon
 from pyproj import Transformer
 
-PROCESSED_FILES_LOG = "filtered_files_list.json" # to skip files that have already been filtered
+PROCESSED_FILES_LOG = "AI_learning_data/filtered_files_list.json" # to skip files that have already been filtered
 
 def load_processed_files():
     if os.path.exists(PROCESSED_FILES_LOG):
