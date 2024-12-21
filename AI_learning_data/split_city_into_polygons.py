@@ -90,7 +90,7 @@ def is_building_in_polygon(building, polygon, polygon_crs="EPSG:4979", building_
         lon, lat = transformer.transform(lon, lat)
     building_point = Point(lon, lat)
     return polygon.contains(building_point)
-def generate_city_json(city_name, polygons, buildings_data, vertices_data, output_folder, polygon_crs):
+def generate_city_json(city_name, polygons, buildings_data, vertices_data, output_folder, polygon_crs, target_area):
     print("collecting buildings data for polygons...")
     result = {"polygons_with_buildings": []}
     for i, polygon in enumerate(polygons):
@@ -114,55 +114,79 @@ def generate_city_json(city_name, polygons, buildings_data, vertices_data, outpu
         })
     result["vertices"] = vertices_data
     os.makedirs(output_folder, exist_ok=True)
-    output_path = os.path.join(output_folder, f"{city_name}_polygons_with_buildings.json")
+    size_tag = ""
+    if target_area == 1000000:
+        size_tag = "AVG"
+    elif target_area == 100000:
+        size_tag = "SMALL"
+    elif target_area == 10000000:
+        size_tag = "BIG"
+    output_path = os.path.join(output_folder, f"{city_name}_polygons_{size_tag}.json")
     with open(output_path, 'w') as f:
         json.dump(result, f)
     print(f"JSON file saved to {output_path}")
 
+input_dir = "AI_learning_data/downloaded_JSONs/filtered/combined"
 gdf = gpd.read_file("AI_learning_data/500_Cities/CityBoundaries.shp")
-city_name = input("Input city name: ")
-filtered_gdf = gdf[gdf['NAME'].str.lower() == city_name.lower()]
 
-if not filtered_gdf.empty:
-    city_geometry = filtered_gdf.geometry.values[0]
-    original_area = city_geometry.area
-    print(f"City Area (original CRS): {original_area} square meters")
-    
-    filtered_gdf = filtered_gdf.to_crs("EPSG:4979")
-    city_geometry_epsg4979 = filtered_gdf.geometry.values[0]
-    
-    print("Splitting city into polygons...")
-    polygons = split_city_into_polygons(city_geometry_epsg4979, original_area, target_area=1000000)
-    print("...finished splitting city into polygons")
+for file_name in os.listdir(input_dir):
+    if file_name.endswith("_COMBINED.json"):
+        file_path = os.path.join(input_dir, file_name)
 
-    # plot city split into polygons
-    ax = filtered_gdf.plot(edgecolor='black', facecolor='none', figsize=(10, 8), alpha=0.5)
-    for polygon in polygons:
-        gpd.GeoSeries([polygon]).plot(ax=ax, facecolor='blue', alpha=0.3, edgecolor='darkblue')
+        city_name = file_name.split('_')[1].lower()
+        filtered_gdf = gdf[gdf['NAME'].str.lower() == city_name.lower()]
 
-    with open("AI_learning_data/downloaded_JSONs/filtered/combined/Alabama_Mobile_COMBINED.json", "r") as file:
-        city_json_data = json.load(file)
-    
-    buildings_data = city_json_data['CityObjects']
-    vertices_data = city_json_data['vertices']
+        if not filtered_gdf.empty:
+            city_geometry = filtered_gdf.geometry.values[0]
+            original_area = city_geometry.area
+            print(f"city Area (original CRS): {original_area} square meters")
+            
+            filtered_gdf = filtered_gdf.to_crs("EPSG:4979")
+            city_geometry_epsg4979 = filtered_gdf.geometry.values[0]
+            
+            target_areas = [
+                1_000_000,
+                10_000_000,
+                100_000
+            ]
 
-    # # Plotting a subset of buildings
-    # print("Plotting a subset of buildings...")
-    # building_points = []
-    # for building_id, building in buildings_data.items():
-    #     # Extract building latitude and longitude
-    #     lat = building['attributes']['latitude']
-    #     lon = building['attributes']['longitude']
-    #     building_points.append(Point(lon, lat))
+            print(len(target_areas))
 
-    # # Plot all buildings
-    # gpd.GeoSeries(building_points).plot(ax=ax, color='red', alpha=0.7, markersize=10)
+            for target_area in target_areas:
+                print("cur target_area:", target_area)
+                print("splitting city into polygons...")
+                polygons = split_city_into_polygons(city_geometry_epsg4979, original_area, target_area=target_area)
+                print("...finished splitting city into polygons")
 
-    # plt.title(f"Random Subdivision of {city_name}")
-    # plt.show()
+                # plot city split into polygons
+                ax = filtered_gdf.plot(edgecolor='black', facecolor='none', figsize=(10, 8), alpha=0.5)
+                for polygon in polygons:
+                    gpd.GeoSeries([polygon]).plot(ax=ax, facecolor='blue', alpha=0.3, edgecolor='darkblue')
 
-    output_folder = "AI_learning_data/final_learning_data"
-    generate_city_json(city_name, polygons, buildings_data, vertices_data, output_folder, "EPSG:4979")
-    print("...finished generate_city_json()")
-else:
-    print(f"No city found with the name '{city_name}'.")
+                # with open("AI_learning_data/downloaded_JSONs/filtered/combined/Alabama_Mobile_COMBINED.json", "r") as file:
+                with open(file_path, "r") as file:
+                    city_json_data = json.load(file)
+                
+                buildings_data = city_json_data['CityObjects']
+                vertices_data = city_json_data['vertices']
+
+                # # Plotting a subset of buildings
+                # print("Plotting a subset of buildings...")
+                # building_points = []
+                # for building_id, building in buildings_data.items():
+                #     # Extract building latitude and longitude
+                #     lat = building['attributes']['latitude']
+                #     lon = building['attributes']['longitude']
+                #     building_points.append(Point(lon, lat))
+
+                # # Plot all buildings
+                # gpd.GeoSeries(building_points).plot(ax=ax, color='red', alpha=0.7, markersize=10)
+
+                plt.title(f"random Subdivision of {city_name}")
+                plt.show()
+
+                output_folder = "AI_learning_data/learning_data"
+                generate_city_json(city_name, polygons, buildings_data, vertices_data, output_folder, "EPSG:4979", target_area=target_area)
+                print("...finished generate_city_json()")
+        else:
+            print(f"no city found with the name '{city_name}'.")
