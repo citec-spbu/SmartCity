@@ -1,12 +1,12 @@
 # SmartCity
 
-## Обзор
+## Описание
 
 Система генерации застройки.
 
 ---
 
-## Шаги по генерации данных для обучения нейросети
+## Шаги для генерации данных для обучения нейросети
 
 ### 1. Скачать необходимые данные
 
@@ -14,12 +14,6 @@
     ```bash
     python3 AI_learning_data/download_JSONs_of_corresponding_cities.py
     ```
-2. **скачать архив 500 Cities: City Boundaries:**
-    - [500 Cities: City Boundaries](https://data.cdc.gov/500-Cities-Places/500-Cities-City-Boundaries/n44h-hy2j/about_data)
-    - поместить его содержимое в папку:
-        ```
-        AI_learning/500_Cities
-        ```
 
 ### 2. Отфильтровать данные
 
