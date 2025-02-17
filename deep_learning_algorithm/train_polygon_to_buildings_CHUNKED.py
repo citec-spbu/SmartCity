@@ -18,7 +18,7 @@ from shapely.errors import GEOSException
 #########################################
 
 # Folders & paths
-DATA_FOLDER = "AI_learning_data/idk_short"  # or "AI_learning_data/idk_short", etc.
+DATA_FOLDER = "AI_learning_data/idk_super_short"  # or "AI_learning_data/idk_short", etc.
 MODEL_SAVE_PATH = "building_model_CHUNKED.pth"
 
 # Model architecture

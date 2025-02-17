@@ -16,7 +16,7 @@ from shapely.ops import unary_union  # optional if needed
 # Configuration
 ############################################
 
-DATA_FOLDER = "AI_learning_data/idk_short"
+DATA_FOLDER = "AI_learning_data/idk_super_short"
 MODEL_SAVE_PATH = "building_model_RAM.pth"
 
 # We do NOT normalize coords; using them as is.
