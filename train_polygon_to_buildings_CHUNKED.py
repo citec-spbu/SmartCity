@@ -19,7 +19,7 @@ from shapely.errors import GEOSException
 
 # Folders & paths
 DATA_FOLDER = "AI_learning_data/idk_short"  # or "AI_learning_data/idk_short", etc.
-MODEL_SAVE_PATH = "building_model_chunked.pth"
+MODEL_SAVE_PATH = "building_model_CHUNKED.pth"
 
 # Model architecture
 INPUT_SIZE = 10   # e.g. 5 polygon boundary points -> 10 floats

@@ -1,3 +1,23 @@
+
+import argparse
+import importlib
+
+parser = argparse.ArgumentParser(description="Choose mode: RAM or Chunked")
+parser.add_argument("--ram", action="store_true", help="Use train_polygon_to_buildings_RAM")
+parser.add_argument("--chunked", action="store_true", help="Use train_polygon_to_buildings_CHUNKED")
+args = parser.parse_args()
+
+if args.ram and args.chunked:
+    raise ValueError("Please specify only one mode: --ram or --chunked")
+elif args.ram:
+    module_name = "train_polygon_to_buildings_RAM"
+elif args.chunked:
+    module_name = "train_polygon_to_buildings_CHUNKED"
+else:
+    raise ValueError("Please specify a mode: --ram or --chunked")
+
+module = importlib.import_module(module_name)
+
 import os
 import random
 import json
@@ -115,3 +135,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
