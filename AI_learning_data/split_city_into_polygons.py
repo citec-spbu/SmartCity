@@ -59,13 +59,13 @@ def split_city_into_polygons(city_boundary, original_area, target_area, min_vert
     centroids = kmeans.cluster_centers_
     voronoi = voronoi_diagram(MultiPoint([Point(c) for c in centroids]))
 
-    # Parallelized polygon processing
+    # parallelized polygon processing
     results = Parallel(n_jobs=-1, backend="loky")(
         delayed(process_polygon)(poly, city_polygon, min_vertices, max_vertices) 
         for poly in voronoi.geoms
     )
 
-    # Flatten list and remove None values
+    # flatten list and remove None values
     result_polygons = [
         poly for sublist in results if sublist 
         for poly in (sublist if isinstance(sublist, list) else [sublist])
@@ -78,16 +78,16 @@ def generate_random_points(polygon, num_points):
     points = []
     
     while len(points) < num_points:
-        # Generate in batches to improve efficiency
+        # generate in batches to improve efficiency
         batch_size = (num_points - len(points)) * 2
         candidate_points = np.column_stack((
             np.random.uniform(min_x, max_x, batch_size),
             np.random.uniform(min_y, max_y, batch_size)
         ))
 
-        # Convert NumPy array to Shapely Points and filter inside polygon
+        # convert numpy array to shapely points and filter inside polygon
         valid_points = [Point(p) for p in candidate_points if polygon.contains(Point(p))]
-        points.extend(valid_points[:num_points - len(points)])  # Ensure we don't exceed num_points
+        points.extend(valid_points[:num_points - len(points)])  # ensure we don't exceed num_points
     
     return np.array([[p.x, p.y] for p in points])
 def simplify_polygon(polygon, min_vertices, max_vertices):
@@ -106,32 +106,32 @@ def simplify_polygon(polygon, min_vertices, max_vertices):
 def extract_pols_with_buildings_to_json(city_name, polygons, buildings_data, output_folder, target_area):
     print("preprocessing buildings and polygons...")
     
-    # Precompute building points
+    # precompute building points
     building_points = {}
     for building_id, data in buildings_data.items():
         lat = data['attributes']['latitude']
         lon = data['attributes']['longitude']
         building_points[building_id] = Point(lon, lat)  # x=longitude, y=latitude
     
-    # Create R-tree index for polygons
+    # create R-tree index for polygons
     polygon_index = index.Index()
     prepared_polygons = []
     for idx, polygon in enumerate(polygons):
         polygon_index.insert(idx, polygon.bounds)
         prepared_polygons.append(prep(polygon))  # Prepare for faster contains checks
     
-    # Map buildings to polygons
+    # map buildings to polygons
     print("mapping buildings to polygons...")
     polygon_building_map = defaultdict(list)
     
     for building_id, point in building_points.items():
-        # Find candidate polygons using spatial index
+        # find candidate polygons using spatial index
         candidates = polygon_index.intersection((point.x, point.y, point.x, point.y))
         for candidate_idx in candidates:
             if prepared_polygons[candidate_idx].contains(point):
                 polygon_building_map[candidate_idx].append(building_id)
     
-    # Build result structure
+    # build result structure
     print("building result structure...")
     result = {"polygons_with_buildings": []}
     for polygon_idx, building_ids in polygon_building_map.items():
@@ -154,7 +154,6 @@ def extract_pols_with_buildings_to_json(city_name, polygons, buildings_data, out
             "buildings": buildings_in_polygon
         })
     
-    # result["vertices"] = vertices_data # TODO: files for same city have same vertices data.
     os.makedirs(output_folder, exist_ok=True)
     formatted_area = f"{int(target_area)}"
     output_path = os.path.join(output_folder, f"{city_name}_polygons_{formatted_area}.json")
@@ -171,12 +170,10 @@ gdf = gpd.read_file("AI_learning_data/500_Cities/CityBoundaries.shp")
 small_areas = list(range(5_000, 25_001, 1_000))
 medium_areas = list(range(25_000, 50_001, 5_000))
 large_areas = list(range(50_000, 150_001, 10_000))
-# target_areas = small_areas + medium_areas + large_areas
-target_areas = small_areas # TODO: bring back large areas (some error sometimes occur with them)
+target_areas = small_areas + medium_areas + large_areas
 
-small_cities = ["passaic"]
-huge_cities = ["anchorage", "los angeles", "san diego", "honolulu"]
-partially_completed_cities = ["mobile", "montgomery", "tuscaloosa", "yuma", "alameda", "fresno", "merced", "napa", "orange", "riverside", "sacramento", "san bernardino", "san francisco", "san mateo", "santa barbara", "santa clara", "boulder", "denver", "pueblo", "hartford", "new haven", "champaign", "baltimore", "worcester", "kalamazoo", "st. louis"]
+small_cities = ["passaic"]                                          # may not be very informative
+huge_cities = ["anchorage", "los angeles", "san diego", "honolulu"] # take several hours to get 5,000 m^2 split
 
 for file_name in os.listdir(input_dir):
     if file_name.endswith("_COMBINED.json"):
@@ -185,16 +182,11 @@ for file_name in os.listdir(input_dir):
         print(f"working with city {city_name}")
         filtered_gdf = gdf[gdf['NAME'].str.lower() == city_name.lower()]
 
-        # if city_name == "anchorage" or city_name == "los angeles" or city_name == "san diego":
         if city_name in huge_cities or city_name in small_cities:
-            continue
-
-        if city_name in partially_completed_cities:
             continue
 
         if not filtered_gdf.empty:
             city_geometry = filtered_gdf.geometry.values[0]
-            # original_area = city_geometry.area
             
             filtered_gdf = filtered_gdf.to_crs("EPSG:4979")
             city_geometry_epsg4979 = filtered_gdf.geometry.values[0]
