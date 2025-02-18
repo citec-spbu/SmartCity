@@ -18,7 +18,7 @@ from shapely.errors import GEOSException
 #########################################
 
 # Folders & paths
-DATA_FOLDER = "AI_learning_data/idk_super_short"  # or "AI_learning_data/idk_short", etc.
+DATA_FOLDER = "deep_learning_algorithm/AI_learning_data/idk_super_short"  # or "AI_learning_data/idk_short", etc.
 MODEL_SAVE_PATH = "building_model_CHUNKED.pth"
 
 # Model architecture
@@ -37,7 +37,7 @@ BATCH_SIZE = 4
 LEARNING_RATE = 1e-3
 
 # We'll do EPOCHS passes over the entire file list
-EPOCHS = 1   # increase if you want more passes
+EPOCHS = 10   # increase if you want more passes
 FILES_PER_CHUNK = 10  # how many .json files to load at a time
 SHUFFLE_FILES = True  # if True, shuffle the file list each epoch
 
