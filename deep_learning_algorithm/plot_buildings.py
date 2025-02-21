@@ -39,7 +39,7 @@ def main():
     # Iterate over all buildings (CityObjects)
     for building_id, building_info in data["CityObjects"].items():
         counter += 1
-        if (counter > 1_000):
+        if (counter > 4_000):
             break
 
         # Plot the building center (longitude, latitude)
