@@ -4,9 +4,49 @@
 
 Система генерации застройки.
 
+## Детерменированный алгоритм
+
+### 1. Чтобы сгенерировать .dem-файлик случайного рельефа, нужно запустить:
+
+```bash
+python3 deterministic_algorithms/01_generate_DEM_file.py
+```
+
+Посмотреть на него в 3D-виде можно, запустив:
+
+```bash
+python3 deterministic_algorithms/02_plot_hills.py
+```
+
+![3D-график рельефа](pictures/hills_3d.png)
+
+Посмотреть на него сверху можно, запустив:
+
+```bash
+python3 deterministic_algorithms/03_plot_hill_section.py
+```
+
+![2D-график рельефа](pictures/hills_2d.png)
+
+### 2. Чтобы найти плоские участки на данном рельефе, нужно запустить:
+
+```bash
+python3 deterministic_algorithms/04_find_flat_areas.py
+```
+
+![2D-график рельефа](pictures/flat_areas.png)
+
+### 3. Чтобы найти плоскую прямоугольную сетку для будущей потенциальной дорожной сети, нужно запустить:
+
+```bash
+python3 deterministic_algorithms/05_find_flat_areas.py
+```
+
+![2D-график рельефа](pictures/flat_grid.png)
+
 ---
 
-## Шаги для генерации данных для обучения нейросети
+## Нейросетевой подход: шаги для генерации данных для обучения нейросети
 
 ### 0. Перейти в подпапку, связанную с нейросетевым алгоритмом
 
